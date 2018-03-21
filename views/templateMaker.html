@@ -1,0 +1,33 @@
+
+
+<div>
+    <select name="templateChoices" >
+        <option ng-repeat="option in templates" value="{{option.id}}">{{option.name}}</option>
+    </select>
+    <button ng-click="newTemplate()">New Template</button>
+</div>
+
+<div>
+    <form>
+        <div>
+            <label>Item Label text:</label>
+            <textarea type="text" required ng-model="item.label"/>
+        </div>
+        <div>
+            <select name="inputTypes" ng-model="item.type" ng-options="type for type in inputTypes"></select>
+        </div>
+        <div>
+            <button ng-click="addItem()">Add Item</button>
+        </div>
+    </form>
+    <form>
+        <h4>Preview</h4>
+        <div>
+            <label>{{item.label}} <input type="{{item.type}}"></label>
+        </div>
+    </form>
+
+    <div>
+        
+    </div>
+</div>

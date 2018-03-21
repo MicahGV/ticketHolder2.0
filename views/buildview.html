@@ -1,0 +1,14 @@
+<form novalidate>
+    <div ng-repeat="row in buildTicket">
+        <label>{{row.label}}<input type="{{row.type}}" ng-model="row.text"/></label>
+    </div>
+    <div>
+        <input type="submit" ng-click="save()" value="Submit">
+        <input type="button" value="Reset" ng-click="reset()">
+        <input type="button" value="Check All" ng-click="checkAll()">
+        <a ng-href=""></a>
+    </div>
+</form>
+<div ng-repeat="ticket in allTickets" >
+    <ticket-view ticket-info = "ticket"></ticket-view>
+</div>
