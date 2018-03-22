@@ -8,7 +8,12 @@
 </div>
 
 <div>
+
     <form>
+        <div>
+            <label>Template Name</label>
+            <input type="text" ng-model="selectedTemplate.name">
+        </div>
         <div>
             <label>Item Label text:</label>
             <textarea type="text" required ng-model="item.label"/>
@@ -20,14 +25,31 @@
             <button ng-click="addItem()">Add Item</button>
         </div>
     </form>
+
     <form>
-        <h4>Preview</h4>
+        <h4>{{selectedTemplate.name ? selectedTemplate.name : 'Preview'}}</h4>
         <div>
             <label>{{item.label}} <input type="{{item.type}}"></label>
         </div>
     </form>
 
     <div>
+        <form>
+            
+            <div ng-repeat="row in selectedTemplate.items">
+                <label>{{row.label}}</label>
+                <input type="{{row.type}}">
+                <span>
+                    <button ng-click="deleteItem($index)">Delete</button>
+                    <button ng-click="editItem($index)">Edit</button>
+                    <button ng-click="moveUp($index)">↑</button>
+                    <button ng-click="moveDown($index)">↓</button>
+                </span>
+            </div>
+            <span ng-if="selectedTemplate.items.length != 0">
+                <button ng-click="saveTemplate()">Save Template</button>
+            </span>
+        </form>
         
     </div>
 </div>

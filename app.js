@@ -1,3 +1,5 @@
+
+
 let app = angular.module('ticketHolderApp',['ngResource','ngRoute']);
 
 app.config(function($routeProvider){
@@ -103,9 +105,8 @@ app.directive('templateMaker', function(){
     };
 });
 
-app.controller('templateMakerCtrl',function($scope ) {
+app.controller('templateMakerCtrl',function($scope, templateFactory) {
     $scope.selectedTemplate = {
-        id: '', //Will be removed later as the db will set this
         name: '',
         items: []
     };
@@ -118,24 +119,71 @@ app.controller('templateMakerCtrl',function($scope ) {
 
     $scope.addItem = function () {
         $scope.selectedTemplate.items.push($scope.item);
-        $scope.item = {
-            value: '',
-            label: 'Placeholder',
-            type: 'text'
-        };
+        $scope.item = new templateFactory.templateItem();
     };
+
+    $scope.moveUp = function(index) {
+        let items = $scope.selectedTemplate.items;
+        let swapIndex = index - 1;
+        if(index === 0){
+            swapIndex = items.length - 1;
+        }
+        swapItems(index,swapIndex);
+    };
+    
+    $scope.moveDown = function(index) {
+        let items = $scope.selectedTemplate.items;
+        let swapIndex = index + 1;
+        if(index === items.length -1){
+            swapIndex = 0;
+        }
+        swapItems(index,swapIndex);
+    };
+
+    $scope.deleteItem = function(index) {
+        if(confirm('Are you sure?') === true) {
+            console.log($scope.selectedTemplate.items);
+            $scope.selectedTemplate.items.splice(index,1);
+        }
+    };
+
+    //TODO: Add editing function witin angular material modal
+    $scope.editItem = function(index) {
+        alert('THIS WILL BE A MODAL');
+    };
+
+    function swapItems(index,swapIndex) {
+        let items = $scope.selectedTemplate.items;
+        let selected = items[index],
+            swap = items[swapIndex];
+        items[index] = swap;
+        items[swapIndex] = selected;
+    }
     
     $scope.templates = {}; //TODO: Create service to pull templates from a DB. Maybe use pouchDB?
-    
-    $scope.createTemplate = function () {  
-        
+
+    $scope.saveTemplate = function () {  
+        templateFactory.addTemplate($scope.selectedTemplate);
     };
+    $scope.deleteTemplate = function (id) {
+        templateFactory.deleteTemplate(id);
+    };
+    $scope.updateTemplate = function() {
+        templateFactory.updateTemplate($scope.selectedTemplate);
+    };
+
+    //templateFactory.getTickets().then((data) => {
+        //$scope.templates = data;
+    //});
 });
 
 
-app.factory('templateFactory', function() {
+app.factory('templateFactory', function($resource) {
+    let templateResource = $resource('http://localhost:3000/templates/:templateId', {templateId:'@id'}, {'update':{method:'PUT'}});
+
     return {
-        templateItem: function(value, label, type) {
+        //Models
+        templateItem: function(value = " ", label = "Place Holder", type = "text") {
             this.value = value;
             this.label = label;
             this.type = type;
@@ -143,6 +191,20 @@ app.factory('templateFactory', function() {
         template: function(name, items) {
             this.name = name;
             this.items = items;
+        }, 
+        //REST methods
+        addTemplate: function(newTemplate) {
+            templateResource.save(newTemplate);
+        },
+        updateTemplate: function(newTemplate) {
+            templateResource.update(newTemplate);
+        },
+        deleteTemplate: function(id) {
+            templateResource.delete({templateId:id});
+        },
+        getTemplates: function() {
+            return templateResource.query().$promise;
         }
+
     };
 });
