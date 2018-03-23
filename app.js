@@ -1,8 +1,8 @@
 
 
-let app = angular.module('ticketHolderApp',['ngResource','ngRoute']);
+let app = angular.module('ticketHolderApp',['ngResource','ngRoute', 'ngMaterial']);
 
-app.config(function($routeProvider){
+app.config(function($routeProvider, $mdThemingProvider) {
     $routeProvider
     .when('/ticketHolder', {
         template:'<build-view></build-view>',
@@ -12,6 +12,11 @@ app.config(function($routeProvider){
     .otherwise({
         redirectTo:'/ticketHolder'
     });
+
+    $mdThemingProvider.theme('default')
+        .dark()
+        .primaryPalette('blue-grey')
+        .accentPalette('deep-orange');
 });
 
 app.directive('buildView', function() {
@@ -93,7 +98,7 @@ app.controller('ticketCtrl', function($scope) {
         }
         return text;
     };
-
+    
     $scope.ticketText = $scope.getTicketText($scope.ticketInfo);
 });
 
@@ -115,14 +120,17 @@ app.controller('templateMakerCtrl',function($scope, templateFactory) {
         label:'Place holder',
         type: 'text'
     };
-    $scope.inputTypes = ['checkbox','text'];
+    $scope.templates = templateFactory.getTemplates(); //TODO: Create service to pull templates from a DB. Maybe use pouchDB?
 
+    $scope.inputTypes = ['checkbox','text'];
+    
     $scope.addItem = function () {
         $scope.selectedTemplate.items.push($scope.item);
         $scope.item = new templateFactory.templateItem();
     };
 
     $scope.moveUp = function(index) {
+        console.log(index);
         let items = $scope.selectedTemplate.items;
         let swapIndex = index - 1;
         if(index === 0){
@@ -160,7 +168,6 @@ app.controller('templateMakerCtrl',function($scope, templateFactory) {
         items[swapIndex] = selected;
     }
     
-    $scope.templates = {}; //TODO: Create service to pull templates from a DB. Maybe use pouchDB?
 
     $scope.saveTemplate = function () {  
         templateFactory.addTemplate($scope.selectedTemplate);
@@ -172,6 +179,10 @@ app.controller('templateMakerCtrl',function($scope, templateFactory) {
         templateFactory.updateTemplate($scope.selectedTemplate);
     };
 
+    $scope.newTemplate = function() {
+        console.log($scope.templates);
+        console.log($scope.selectedTemplate);
+    };
     //templateFactory.getTickets().then((data) => {
         //$scope.templates = data;
     //});
@@ -203,7 +214,7 @@ app.factory('templateFactory', function($resource) {
             templateResource.delete({templateId:id});
         },
         getTemplates: function() {
-            return templateResource.query().$promise;
+            return templateResource.query();
         }
 
     };

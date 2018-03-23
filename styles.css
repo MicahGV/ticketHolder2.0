@@ -1,0 +1,17 @@
+.buttonFloatRight {
+    float:right;
+}
+
+/* 
+Makes checkbox for labels on the left side instead of right
+dir ="rt1" did not work for whatever reason
+*/
+
+md-checkbox .md-label {
+    margin-left: auto;
+    margin-right: 30px;
+}
+md-checkbox .md-container {
+    left:auto;
+    right:0;
+}

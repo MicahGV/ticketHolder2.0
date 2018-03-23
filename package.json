@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "dev": "live-server --ignore=db.json",
+    "dev": "live-server --ignore=/home/micah/Documents/VSCodeProjects/ticketBuilder2.0/db.json",
     "servejson":"json-server --watch db.json"
   },
   "author": "me",

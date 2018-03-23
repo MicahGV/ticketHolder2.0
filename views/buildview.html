@@ -1,6 +1,8 @@
+<!--
 <form novalidate>
     <div ng-repeat="row in buildTicket">
-        <label>{{row.label}}<input type="{{row.type}}" ng-model="row.text"/></label>
+        <label>{{row.label}}</label>
+        <input type="{{row.type}}" ng-model="row.text"/>
     </div>
     <div>
         <input type="submit" ng-click="save()" value="Submit">
@@ -11,4 +13,35 @@
 </form>
 <div ng-repeat="ticket in allTickets" >
     <ticket-view ticket-info = "ticket"></ticket-view>
+</div>
+-->
+<div layout="column" layout-align="center center">
+    <md-card>
+        <md-card-content>
+            <!--
+                Need to add templatefacotry service
+
+            <md-card-title-text>
+                <span class="md-headline">{{selectedTemplate.name ? selectedTemplate.name : 'Template Name'}}</span>
+            </md-card-title-text>
+             -->
+            
+            <md-list>
+                <md-list-item layout="row" ng-repeat="row in buildTicket" class="md-block">
+                    <span layout="row"layout-fill layout-align="end center" >
+                        <md-checkbox ng-if="row.type === 'checkbox'" >{{row.label}}</md-checkbox>
+                        <label ng-if="row.type === 'text'">{{row.label}}: </label>
+                        <md-input-container ng-if="row.type === 'text'" >
+                            <input type="{{row.type}}">
+                        </md-input-container>
+                    </span>
+                </md-list-item>
+            </md-list>
+            <md-card-actions layout-align="end center" ng-if="selectedTemplate.items.length != 0">
+                <md-button class="md-raised" ng-click="save()">Save</md-button >
+                <md-button class="md-raised" ng-click="reset()">Reset</md-button>
+                <md-button class="md-raised" ng-click="checkAll()">Check All</md-button>
+            </md-card-actions>
+        </md-card-content>
+    </md-card>
 </div>

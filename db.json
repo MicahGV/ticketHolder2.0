@@ -1,3 +1,31 @@
 {
-  "templates": []
+  "templates": [
+    {
+      "name": "A sweet Name",
+      "items": [
+        {
+          "value": "",
+          "label": "A rad Textbox",
+          "type": "text"
+        },
+        {
+          "value": " ",
+          "label": "A dope checkbox",
+          "type": "checkbox"
+        }
+      ],
+      "id": 1
+    },
+    {
+      "name": "test",
+      "items": [
+        {
+          "value": "",
+          "label": "Place holder",
+          "type": "text"
+        }
+      ],
+      "id": 2
+    }
+  ]
 }
