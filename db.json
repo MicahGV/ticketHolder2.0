@@ -26,6 +26,67 @@
         }
       ],
       "id": 2
+    },
+    {
+      "name": "Generic",
+      "items": [
+        {
+          "value":"",
+          "label":"Requester's Name ",
+          "type":"text"},
+        {
+          "value":"",
+          "label":"Ticket Number or Computer Name ",
+          "type":"text"},
+        {
+          "value":"",
+          "label":"Hardware ",
+          "type":"text"},
+        {
+          "value":"",
+          "label":"Imaged Machine ",
+          "type":"checkbox"},
+        {
+          "value":"",
+          "label":"Named and Joined to domain ",
+          "type":"checkbox"},
+        {
+          "value":"",
+          "label":"Moved new computer to proper OU ",
+          "type":"checkbox"},
+        {
+          "value":"",
+          "label":"Restarted;ran gpupdate /force ",
+          "type":"checkbox"},
+        {
+          "value":"",
+          "label":"Installed Office 2013, Reader, Flash, Java [if needed] ",
+          "type":"checkbox"},
+        {
+          "value":"",
+          "label":"Deployed LTC Icon via Script (NOT FOR NEW CENTERS) ",
+          "type":"checkbox"},
+        {
+          "value":"",
+          "label":"Created Procurement for Office 2013 and assigned to Shanna ",
+          "type":"checkbox"},
+        {
+          "value":"",
+          "label":"Set static IP to ",
+          "type":"text"},
+        {
+          "value":"",
+          "label":"Set gateway to ",
+          "type":"text"},
+        {
+          "value":"",
+          "label":"set DNS to 192.168.1.15/192.168.1.16 ",
+          "type":"checkbox"},
+        {
+          "value":"",
+          "label":"Tracking Number ",
+          "type":"text"}
+      ]
     }
   ]
 }

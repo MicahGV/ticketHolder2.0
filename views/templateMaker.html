@@ -4,18 +4,17 @@
     <md-card>
         <md-card-content md-theme="docs-dark" layout-xs="row" layout-padding>
             <md-input-container>
-                <md-select name="templateChoices" ng-model="selectedTemplate" aria-label="template Choices">
+                <md-select name="templateChoices" ng-model="selectedTemplate" aria-label="template Choices" >
                     <md-select-header>
                         <span>stuff</span>
                     </md-select-header>
-                    <md-option ng-value= "option" ng-repeat="option in templates">{{option.name}}</md-option>
+                    <md-option ng-value= "option" ng-repeat="option in templates" >{{option.name}}</md-option>
                 </md-select>
             </md-input-container>
             <md-button class="md-raised md-primary" ng-click="newTemplate()">New Template</md-button>
         </md-card-content>
     </md-card>
 </div>
-
 <div layout="column" layout-align="center center">
         <!-- Template input maker -->
     <md-card>
@@ -49,14 +48,14 @@
         </md-card-actions>
     </md-card>
         <!--Template Preview -->
-    <md-card>
+    <md-card  ng-if="selectedTemplate.items.length != 0">
         <md-card-content>
             <md-card-title-text>
                 <span class="md-headline">{{selectedTemplate.name ? selectedTemplate.name : 'Template Name'}}</span>
             </md-card-title-text>
             <md-list>
                 <md-list-item layout="row" ng-repeat="row in selectedTemplate.items" dir="rt1">
-                    <span layout="row"layout-fill layout-align="end center" dir="rt1">
+                    <span layout="row"layout-fill layout-align="end center">
                         <md-checkbox ng-if="row.type === 'checkbox'" >{{row.label}}</md-checkbox>
                         <label ng-if="row.type === 'text'">{{row.label}}: </label>
                         <md-input-container ng-if="row.type === 'text'">

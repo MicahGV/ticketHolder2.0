@@ -1,4 +1,4 @@
-
+//TODO:MODULARIZE PRETTY MUCH EVERYTHING IN HERE
 
 let app = angular.module('ticketHolderApp',['ngResource','ngRoute', 'ngMaterial']);
 
@@ -27,53 +27,32 @@ app.directive('buildView', function() {
     };
 });
 
-app.controller('buildCtrl', function($scope, $window, $routeParams) {
-    $scope.templateSelection = {};
+app.controller('buildCtrl', function($scope, $window, $routeParams, templateFactory, ticketFactory) {
+    $scope.templates = templateFactory.getTemplates() || {};
+    
+    $scope.selectedTemplate = {};
 
-    $scope.buildTicket = {
-        name: {value:'', label:"Requester's Name ",type:'text'},
-        ticketnum: {value:'', label:"Ticket Number or Computer Name ",type:'text'},
-        hardware: {value:'', label:"Hardware ",type:'text'},
-        imaged: {value:'', label:"Imaged Machine ",type:'checkbox'},
-        joinDomain: {value:'', label:"Named and Joined to domain ",type:'checkbox'},
-        movedOU: {value:'', label:"Moved new computer to proper OU ",type:'checkbox'},
-        gpupdate: {value:'', label:"Restarted;ran gpupdate /force ",type:'checkbox'},
-        installedSoftware: {value:'', label:"Installed Office 2013, Reader, Flash, Java [if needed] ",type:'checkbox'},
-        ltc: {value:'', label:"Deployed LTC Icon via Script (NOT FOR NEW CENTERS) ",type:'checkbox'},
-        procurement: {value:'', label:"Created Procurement for Office 2013 and assigned to Shanna ",type:'checkbox'},
-        staticIP: {value:'', label:"Set static IP to ",type:'text'},
-        gateway: {value:'', label:"Set gateway to ",type:'text'},
-        dns: {value:'', label:"set DNS to 192.168.1.15/192.168.1.16 ",type:'checkbox'},
-        trackingNum: {value:'', label:"Tracking Number ",type:'text'},
-    };
-    $scope.allTickets = [];
+    $scope.allTickets = ticketFactory.getAllTickets() || [];
+
 
     $scope.save = function() {
-        $scope.allTickets.push($scope.buildTicket);
-        let jsonTickets = angular.toJson($scope.allTickets);
-        $window.localStorage.setItem('allBuildTickets', jsonTickets);
-        $scope.getTickets();
+        ticketFactory.save($scope.selectedTemplate);
     };
 
-    $scope.reset = function() {
-        $scope.ticket = {};
+    $scope.reset = function () {
+        for(let row in $scope.selectedTemplate.items) {
+            $scope.selectedTemplate.items[row].value = '';
+        }
     };
 
-    $scope.getTickets = function() {
-        let tickets = angular.fromJson($window.localStorage.getItem('allBuildTickets'));
-        $scope.allTickets = tickets || [];
-    };
-
-    $scope.checkAll = function() {
-        angular.forEach($scope.buildTicket, function(val, key){
-            if(typeof(val) === "boolean") {
-                $scope.buildTicket[key] = true;
+    $scope.checkAll = function () {  
+        for(let row in $scope.selectedTemplate.items) {
+            let item = $scope.selectedTemplate.items[row];
+            if(item.type === 'checkbox'){
+                item.value = true;
             }
-        });
+        }
     };
-
-    //Call first
-    $scope.getTickets();
     
 });
 
@@ -83,23 +62,71 @@ app.directive('ticketView', function() {
         templateUrl:'../views/ticket.html',
         controller:'ticketCtrl',
         scope: {
-            ticketInfo: '=ticketInfo'
+            ticketInfo: '=ticketInfo',
+            ticketIndex: '='
         }
     };
 });
 
-app.controller('ticketCtrl', function($scope) {
+app.controller('ticketCtrl', function($scope, $mdDialog, ticketFactory) {
+    //This probably a really dumb way to do this
+    //Getting the name of the computer
+    //This will break on anything, but generic template
+    $scope.ticketTitle = $scope.ticketInfo[1].value || 'No Template Name';
     
+
     $scope.getTicketText = function(ticketInfo) {
         let text = '';
         for(let row in ticketInfo) {
-            if(ticketInfo[row].label !== undefined)
-            text += `\n${ticketInfo[row].label} : ${ticketInfo[row].value}`;
+            if(ticketInfo[row].label !== undefined) {
+                if(ticketInfo[row].type === 'checkbox') {
+                    text += `\n${ticketInfo[row].label.trim()}: ${ticketInfo[row].value ? 'Complete' : 'N/A'}`;
+                } else 
+                    text += `\n${ticketInfo[row].label.trim()}: ${ticketInfo[row].value}`;
+            }
         }
         return text;
     };
-    
+
     $scope.ticketText = $scope.getTicketText($scope.ticketInfo);
+
+    $scope.editTicket = function(ticket){
+        $mdDialog.show({
+            controller: $scope => $scope.ticket = ticket,
+            templateUrl: './views/ticketDialog.tmpl.html',
+            parent: angular.element(document.body),
+            clickOutsideToClose: true,
+            locals: {
+                ticket: $scope.ticketInfo
+            }
+        }).then(() => {
+            //Maybe make a toast or something that said it was edited
+            console.log('eh');
+        }, () => {
+            //
+            ticketFactory.editTicket($scope.ticketInfo);
+            $scope.ticketText = $scope.getTicketText($scope.ticketInfo);
+        });
+    };
+
+    $scope.deleteTicket = function(index) {
+        let confirm = $mdDialog.confirm()
+            .title('Delete the Ticket?')
+            .textContent('Are you sure you want to delete me?')
+            .ariaLabel('Delete Ticket')
+            .ok('Delete me')
+            .cancel("Don't delete me");
+        $mdDialog.show(confirm).then(() => {
+            ticketFactory.deleteTicket(index);
+        },() => {
+            console.log('not deleted');
+        });
+    };
+});
+
+app.controller('dialogCtrl', function($scope, $mdDialog, ticket) {
+    $scope.ticket = ticket;
+    
 });
 
 app.directive('templateMaker', function(){
@@ -180,18 +207,47 @@ app.controller('templateMakerCtrl',function($scope, templateFactory) {
     };
 
     $scope.newTemplate = function() {
+        $scope.selectedTemplate = {
+            name: '',
+            items: [],
+        };
         console.log($scope.templates);
         console.log($scope.selectedTemplate);
     };
-    //templateFactory.getTickets().then((data) => {
-        //$scope.templates = data;
-    //});
+
+});
+
+app.factory('ticketFactory', function($window,$mdDialog) {
+    let allTickets = [];
+
+    return {
+        save: function(ticket) {
+            allTickets.push(ticket);
+            let jsonTickets = angular.toJson(allTickets);
+            $window.localStorage.setItem('allBuildTickets', jsonTickets);
+        },
+        getAllTickets: function() {
+            let tickets = angular.fromJson($window.localStorage.getItem('allBuildTickets'));
+            allTickets = tickets || [];
+            return allTickets;
+        },
+        deleteTicket: function(index) {
+            allTickets.splice(index,1);
+            let jsonTickets = angular.toJson(allTickets);
+            $window.localStorage.setItem('allBuildTickets', jsonTickets);
+        },
+        editTicket: function(ticket, index) {
+            allTickets[index] = ticket;
+            let jsonTickets = angular.toJson(allTickets);
+            $window.localStorage.setItem('allBuildTickets', jsonTickets);
+        }
+    };
 });
 
 
 app.factory('templateFactory', function($resource) {
     let templateResource = $resource('http://localhost:3000/templates/:templateId', {templateId:'@id'}, {'update':{method:'PUT'}});
-
+    
     return {
         //Models
         templateItem: function(value = " ", label = "Place Holder", type = "text") {
@@ -200,6 +256,7 @@ app.factory('templateFactory', function($resource) {
             this.type = type;
         },
         template: function(name, items) {
+            this._id = (new Date()).toISOString();
             this.name = name;
             this.items = items;
         }, 
@@ -218,4 +275,51 @@ app.factory('templateFactory', function($resource) {
         }
 
     };
+});
+
+app.factory('pouchDBService', function ($scope) {
+    let db = new PouchDB('templates');
+    let remoteCouch = 'http://localhost:5984/templates';
+
+    db.changes({
+        since:'now',
+        live:true
+    }).on('change',$scope.$apply);
+
+    function sync() {
+        syncDom.setAttribute('data');
+    }
+    return {
+        //Models
+        templateItem: function(value = " ", label = "Place Holder", type = "text") {
+            this.value = value;
+            this.label = label;
+            this.type = type;
+        },
+        template: function(name, items) {
+            this.name = name;
+            this.items = items;
+        }, 
+        //REST methods
+        addTemplate: function(newTemplate) {
+            db.post(newTemplate, (err, result) => {
+                if(!err) {
+                    console.log('Success');
+                }
+            });
+        },
+        updateTemplate: function(newTemplate) {
+            db.put(newTemplate);
+        },
+        deleteTemplate: function(template) {
+            db.remove(template);
+        },
+        getTemplates: function() {
+            db.allDocs({include_docs: true, descending: true}, (err, doc) => {
+                return doc.rows;
+            });
+        }
+
+    };
+    
 });

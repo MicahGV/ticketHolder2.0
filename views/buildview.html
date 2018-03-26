@@ -18,26 +18,26 @@
 <div layout="column" layout-align="center center">
     <md-card>
         <md-card-content>
-            <!--
-                Need to add templatefacotry service
-
             <md-card-title-text>
                 <span class="md-headline">{{selectedTemplate.name ? selectedTemplate.name : 'Template Name'}}</span>
             </md-card-title-text>
-             -->
-            
+            <md-input-container>
+                <md-select name="templateChoices" ng-model="selectedTemplate">
+                    <md-option ng-value="option" ng-repeat="option in templates" ng-selected="option.name == 'Generic'">{{option.name}}</md-option>
+                </md-select>
+            </md-input-container>
             <md-list>
-                <md-list-item layout="row" ng-repeat="row in buildTicket" class="md-block">
-                    <span layout="row"layout-fill layout-align="end center" >
-                        <md-checkbox ng-if="row.type === 'checkbox'" >{{row.label}}</md-checkbox>
+                <md-list-item layout="row" ng-repeat="row in selectedTemplate.items" class="md-block">
+                    <span layout="row"layout-fill layout-align="end center">
+                        <md-checkbox ng-if="row.type === 'checkbox'" ng-model="row.value">{{row.label}}:</md-checkbox>
                         <label ng-if="row.type === 'text'">{{row.label}}: </label>
                         <md-input-container ng-if="row.type === 'text'" >
-                            <input type="{{row.type}}">
+                            <input type="{{row.type}}" ng-model="row.value">
                         </md-input-container>
                     </span>
                 </md-list-item>
             </md-list>
-            <md-card-actions layout-align="end center" ng-if="selectedTemplate.items.length != 0">
+            <md-card-actions layout-align="end center" ng-if="selectedTemplate.items">
                 <md-button class="md-raised" ng-click="save()">Save</md-button >
                 <md-button class="md-raised" ng-click="reset()">Reset</md-button>
                 <md-button class="md-raised" ng-click="checkAll()">Check All</md-button>
@@ -45,3 +45,8 @@
         </md-card-content>
     </md-card>
 </div>
+<md-content layout="row" layout-wrap>
+    <md-card ng-repeat="ticket in allTickets track by $index">
+        <ticket-view ticket-info = "ticket.items" ticket-index = "$index"></ticket-view>
+    </md-card>
+</md-content>
