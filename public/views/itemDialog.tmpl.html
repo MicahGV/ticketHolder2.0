@@ -1,0 +1,11 @@
+<md-dialog>
+    <md-input-container>
+        <label>Item Label text:</label>
+        <textarea type="text" required ng-model="item.label" aria-label="Input Text"/>
+    </md-input-container>
+    <md-input-container>
+        <md-select name="inputTypes" ng-model="item.type" aria-label="Input type">
+            <md-option ng-repeat="type in inputTypes" ng-value="type" aria-label="Input type">{{type}}</md-option>
+        </md-select>
+    </md-input-container>
+</md-dialog>

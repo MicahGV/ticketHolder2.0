@@ -1,0 +1,14 @@
+
+<md-dialog aria-label="Ticket Dialog">
+    <md-list>
+        <md-list-item layout="row" ng-repeat="row in ticket" class="md-block">
+            <span layout="row"layout-fill layout-align="end center">
+                <md-checkbox ng-if="row.type === 'checkbox'" ng-model="row.value" aria-label="{{row.label}}">{{row.label}}:</md-checkbox>
+                <label ng-if="row.type === 'text'">{{row.label}}: </label>
+                <md-input-container ng-if="row.type === 'text'" >
+                    <input type="{{row.type}}" ng-model="row.value" aria-label="{{row.label}}">
+                </md-input-container>
+            </span>
+        </md-list-item>
+    </md-list>
+</md-dialog>

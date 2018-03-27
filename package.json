@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
     "dev": "live-server --ignore=/home/micah/Documents/VSCodeProjects/ticketBuilder2.0/db.json | npm run servejson",
+    "nodemon": "nodemon server.js",
     "servejson": "json-server --watch db.json"
   },
   "author": "me",
@@ -20,6 +21,7 @@
   "devDependencies": {
     "karma": "^2.0.0",
     "karma-chrome-launcher": "^2.2.0",
-    "karma-jasmine": "^1.1.1"
+    "karma-jasmine": "^1.1.1",
+    "nodemon": "^1.17.2"
   }
 }

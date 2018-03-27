@@ -1,0 +1,13 @@
+
+<md-card-content>
+    <h3>
+        {{ticketTitle}}
+    </h3>
+    <pre>
+        {{ticketText}}
+    </pre>
+</md-card-content>
+<md-card-actions layout="row" layout-align="end center">
+    <md-button class="md-raised" ng-click="deleteTicket(ticketIndex)">Delete</md-button >
+    <md-button class="md-raised" ng-click="editTicket(ticketInfo)">Edit</md-button >
+</md-card-actions>

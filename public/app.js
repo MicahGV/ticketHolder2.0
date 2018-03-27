@@ -187,7 +187,6 @@ app.controller('templateMakerCtrl',function($scope, templateFactory, $mdDialog) 
         }
     };
 
-    //TODO: Add editing function witin angular material modal
     $scope.editItem = function(index) {
         let item = $scope.selectedTemplate.doc.items[index];
         let inputTypes = $scope.inputTypes;
@@ -318,7 +317,7 @@ app.factory('templateFactory', function($resource) {
 app.factory('templateFactory', function () {
 
     let db = new PouchDB('templates');
-    let remoteCouch = '/api/couchdb';
+    let remoteCouch = 'http://192.168.1.179/api/couchdb';
 
     /*db.changes({
         since:'now',
