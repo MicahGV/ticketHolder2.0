@@ -1,0 +1,17 @@
+<div layout="column" layout-align="center center">
+    <input type="text" ng-model="selectedEmail.name">
+    <textarea name="emailText" cols="30" rows="10" ng-model="selectedEmail.text" ng-change="readTextAndCreateInputs()"></textarea>
+    <button ng-click="saveEmail()">Save Email Template</button>
+    <div ng-repeat="input in selectedEmail.inputs">
+        <label>{{input.label}}</label>
+        <input ng-model="input.value" type="text" ng-blur="replacePlaceHolders(input)">
+    </div>
+    <div ng-if="emailCopyText">
+        <pre>
+{{emailCopyText}}
+        </pre>
+        <button ng-click="reset()">Reset</button>
+    </div>
+</div>
+
+{{emails}}

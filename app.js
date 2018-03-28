@@ -1,4 +1,6 @@
-//TODO:MODULARIZE PRETTY MUCH EVERYTHING IN HERE
+//TODO:MODULARIZE PRETTY MUCH EVERYTHING IN HERE as well as create class objects and stuff. That literally is a day goal.
+//You should do that future Micah, Jesus Christ. Past Micah is a bit miffed about it.
+
 
 let app = angular.module('ticketHolderApp',['ngResource','ngRoute', 'ngMaterial']);
 
@@ -8,6 +10,8 @@ app.config(function($routeProvider, $mdThemingProvider) {
         template:'<build-view></build-view>',
     }).when('/templatemaker', {
         template:'<template-maker></template-maker>',
+    }).when('/TrackItEmails', {
+        template:'<tracking-emails></tracking-emails>'
     })
     .otherwise({
         redirectTo:'/ticketHolder'
@@ -18,6 +22,90 @@ app.config(function($routeProvider, $mdThemingProvider) {
         .primaryPalette('blue-grey')
         .accentPalette('deep-orange');
 });
+
+app.directive('trackingEmails', function() {
+    return {
+        restrict:'E',
+        templateUrl:'../views/trackItEmailsView.html',
+        controller:'trackingEmailCtrl'
+    };
+});
+
+app.controller('trackingEmailCtrl', function($scope, pouchDBService) {
+    pouchDBService.setDB('emails');
+
+    $scope.selectedEmail = {
+        text: '',
+        name: '',
+        inputs: []
+    };
+
+    $scope.emailCopyText = '';
+
+    $scope.emails = [];
+
+    let inMatches = function(array, match) {
+        let inOrOut = false;
+        array.forEach((obj) => {
+            if(obj.label === match) {
+                inOrOut = true;
+            }
+        });
+        return inOrOut;
+    };
+
+    //Dynamically creating inputs based on what is typed in text box
+    $scope.readTextAndCreateInputs = function() {
+        let regex = /{([a-zA-Z0-9 ]+)}/g;
+        //Matches placeholders
+        let match;
+        let matches = [];
+        while (match = regex.exec($scope.selectedEmail.text)) {
+            
+            //check if it's in or not
+            if(!inMatches(matches, match[1])) {
+                matches.push({label:match[1],value:''});
+            }
+            
+            $scope.selectedEmail.inputs = matches;
+        }
+        $scope.emailCopyText = $scope.selectedEmail.text;
+    };
+
+    $scope.replacePlaceHolders = function (row) {
+        let regex = new RegExp('{'+row.label+'}','g');
+        $scope.emailCopyText = $scope.emailCopyText.replace(regex, row.value);
+    };
+
+
+    $scope.saveEmail = function() {
+        pouchDBService.addObject($scope.selectedEmail);
+    };
+
+    $scope.newEmail = function() {
+        $scope.selectedEmail = {
+            id: '',
+            doc: {
+                name: '',
+                text: '',
+                inputs: []
+            }
+        };
+    };
+
+    $scope.reset = function () {
+        $scope.emailCopyText = $scope.selectedEmail.text;
+    };
+
+    $scope.refresh = function() {
+        pouchDBService.getObjects().then((data) => { 
+            $scope.emailsl = data.rows;
+            console.log(data);
+        });
+    };
+    $scope.refresh();
+});
+
 
 app.directive('buildView', function() {
     return {
@@ -126,11 +214,6 @@ app.controller('ticketCtrl', function($scope, $mdDialog, ticketFactory) {
     };
 });
 
-app.controller('dialogCtrl', function($scope, $mdDialog, ticket) {
-    $scope.ticket = ticket;
-    
-});
-
 app.directive('templateMaker', function(){
     return {
         restrict:'E',
@@ -152,7 +235,7 @@ app.controller('templateMakerCtrl',function($scope, templateFactory, $mdDialog) 
         label:'Place holder',
         type: 'text'
     };
-    $scope.templates = []; //TODO: Create service to pull templates from a DB. Maybe use pouchDB?
+    $scope.templates = []; 
    
     $scope.inputTypes = ['checkbox','text'];
     
@@ -162,10 +245,12 @@ app.controller('templateMakerCtrl',function($scope, templateFactory, $mdDialog) 
     };
 
     $scope.moveUp = function(index) {
-        console.log(index);
+        console.log(index);//TODO: I need to make this a service instead of just creating a seperate for every need i.e templatefactory emailfactory
+
         let items = $scope.selectedTemplate.doc.items;
         let swapIndex = index - 1;
-        if(index === 0){
+        if(index === 0){//TODO: I need to make this a service instead of just creating a seperate for every need i.e templatefactory emailfactory
+
             swapIndex = items.length - 1;
         }
         swapItems(index,swapIndex);
@@ -187,7 +272,6 @@ app.controller('templateMakerCtrl',function($scope, templateFactory, $mdDialog) 
         }
     };
 
-    //TODO: Add editing function witin angular material modal
     $scope.editItem = function(index) {
         let item = $scope.selectedTemplate.doc.items[index];
         let inputTypes = $scope.inputTypes;
@@ -282,6 +366,8 @@ app.factory('ticketFactory', function($window,$mdDialog) {
     };
 });
 
+
+//REST placeholder
 /*
 app.factory('templateFactory', function($resource) {
     let templateResource = $resource('http://localhost:3000/templates/:templateId', {templateId:'@id'}, {'update':{method:'PUT'}});
@@ -315,10 +401,46 @@ app.factory('templateFactory', function($resource) {
     };
 });
 */
+app.factory('pouchDBService', function() {
+    let db;
+    let remoteCouch;
+
+    return {
+        setDB: function(dbName) {
+            db = new PouchDB(dbName);
+            remoteCouch = 'http://192.168.1.179:5984/'+dbName;
+            db.sync(remoteCouch, {
+                live: true
+                }).on('change', function (change) {
+                    console.log('It worked %s',JSON.stringify(change));
+                }).on('error', function(error) {
+                    console.error(error);
+                });
+        },
+        addObject: function(newObject) {
+            db.post(newObject, (err, result) => {
+                if(!err) {
+                    console.log('Success');
+                    console.log(result);
+                }
+            });
+        },
+        updateObject: function(newObject) {
+            db.put(newObject);
+        },
+        deleteObject: function(obj) {
+            db.remove(obj);
+        },
+        getObjects: function() {
+            return db.allDocs({include_docs: true});
+        }
+    };
+});
+//TODO: Need to move this over to pouchdb Service
 app.factory('templateFactory', function () {
 
     let db = new PouchDB('templates');
-    let remoteCouch = '/api/couchdb';
+    let remoteCouch = 'http://192.168.1.179:5984/templates';
 
     /*db.changes({
         since:'now',
@@ -327,20 +449,20 @@ app.factory('templateFactory', function () {
 
     db.sync(remoteCouch, {
         live: true
-      }).on('change', function (change) {
+        }).on('change', function (change) {
             console.log('It worked %s',JSON.stringify(change));
+        }).on('error', function(error) {
+            console.error(error);
         });
+
     return {
         //Models
-        templateItem: function(value = " ", label = "Place Holder", type = "text") {
+        templateItem: function(value = " ", label = "Place Holder", type = "text", id = '') {
+            this.id = id;
             this.value = value;
             this.label = label;
             this.type = type;
         },
-        template: function(name, items) {
-            this.name = name;
-            this.items = items;
-        }, 
         //REST methods
         addTemplate: function(newTemplate) {
             db.post(newTemplate, (err, result) => {
